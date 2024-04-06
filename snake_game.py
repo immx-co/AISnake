@@ -2,7 +2,6 @@ import pygame
 import random
 from enum import Enum
 from collections import namedtuple
-import numpy as np
 
 
 pygame.init()
@@ -55,9 +54,8 @@ class SnakeGame:
         self.food = Point(x, y)
         if self.food in self.snake:
             self._place_food()
-    
+
     def play_step(self):
-        print(self.snake)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -71,7 +69,7 @@ class SnakeGame:
                     self.direction = Direction.UP
                 elif event.key == pygame.K_DOWN:
                     self.direction = Direction.DOWN
-        
+
         self._move(self.direction)
         self.snake.insert(0, self.head)
         game_over = False
@@ -85,12 +83,12 @@ class SnakeGame:
             self._place_food()
         else:
             self.snake.pop()
-        
+
         self._update_ui()
         self.clock.tick(SPEED)
 
         return game_over, self.score
-    
+
     def _move(self, direction):
         x = self.head.x
         y = self.head.y
@@ -102,13 +100,18 @@ class SnakeGame:
             y += BLOCK_SIZE
         elif direction == Direction.UP:
             y -= BLOCK_SIZE
-        
+
         self.head = Point(x, y)
-    
+
     def _is_collision(self):
-        if self.head.x > self.width - BLOCK_SIZE or self.head.x < 0 or self.head.y > self.height - BLOCK_SIZE or self.head.y < 0:
+        if (
+            self.head.x > self.width - BLOCK_SIZE
+            or self.head.x < 0
+            or self.head.y > self.height - BLOCK_SIZE
+            or self.head.y < 0
+        ):
             return True
-        
+
         if self.head in self.snake[1:]:
             return True
 
@@ -118,10 +121,18 @@ class SnakeGame:
         self.display.fill(BLACK)
 
         for pt in self.snake:
-            pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12))
-        
-        pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
+            pygame.draw.rect(
+                self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE)
+            )
+            pygame.draw.rect(
+                self.display, BLUE2, pygame.Rect(pt.x + 4, pt.y + 4, 12, 12)
+            )
+
+        pygame.draw.rect(
+            self.display,
+            RED,
+            pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE),
+        )
 
         text = font.render(f"Score: {self.score}", True, WHITE)
         self.display.blit(text, [0, 0])
@@ -135,9 +146,9 @@ if __name__ == "__main__":
     while running:
         game_over, score = game.play_step()
 
-        if game_over == True:
+        if game_over is True:
             running = False
 
-    print(f'Final score: {score}')
+    print(f"Final score: {score}")
 
     pygame.quit()
