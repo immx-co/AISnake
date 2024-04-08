@@ -25,7 +25,7 @@ BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 
 BLOCK_SIZE = 20
-SPEED = 10
+SPEED = 70
 
 
 class SnakeGameAI:
@@ -43,8 +43,8 @@ class SnakeGameAI:
         self.head = Point(self.width / 2, self.height / 2)
         self.snake = [
             self.head,
-            # Point(self.head.x - BLOCK_SIZE, self.head.y),
-            # Point(self.head.x - (2 * BLOCK_SIZE), self.head.y),
+            Point(self.head.x - BLOCK_SIZE, self.head.y),
+            Point(self.head.x - (2 * BLOCK_SIZE), self.head.y),
         ]
 
         self.score = 0
@@ -111,7 +111,7 @@ class SnakeGameAI:
             x += BLOCK_SIZE
         elif self.direction == Direction.LEFT:
             x -= BLOCK_SIZE
-        elif self.irection == Direction.DOWN:
+        elif self.direction == Direction.DOWN:
             y += BLOCK_SIZE
         elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
