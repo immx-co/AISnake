@@ -13,14 +13,22 @@ LR = 0.001
 
 
 class Agent:
-    def __init__(self) -> None:
+    def __init__(self, pretrained: bool = False) -> None:
         self.n_games = 0
         self.epsilon = 0
         self.gamma = 0.9
         self.memory = deque(maxlen=MAX_MEMORY)
-        self.model = Linear_QNet(11, 256, 3)
+        self.pretrained = pretrained
+        self.model = self._get_model()
+        self.device = 'cuda:0'
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-        # TODO: model, trainer
+    
+    def _get_model(self):
+        model = Linear_QNet(11, 512, 3)
+        if self.pretrained:
+            checkpoint = torch.load('./model/model_200.pth')
+            model.load_state_dict(checkpoint)
+        return model
 
     def get_state(self, game: SnakeGameAI):
         head = game.snake[0]
@@ -87,6 +95,7 @@ class Agent:
             final_move[move] = 1
         else:
             state0 = torch.tensor(state, dtype=torch.float)
+            state0 = state0.to(self.device)
             prediction = self.model(state0)
             move = torch.argmax(prediction).item()
             final_move[move] = 1
@@ -98,7 +107,7 @@ def train():
     plot_mean_scores = []
     total_score = 0
     record = 0
-    agent = Agent()
+    agent = Agent(pretrained=False)
     game = SnakeGameAI()
 
     while True:

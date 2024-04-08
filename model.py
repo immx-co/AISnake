@@ -10,11 +10,21 @@ class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size) -> None:
         super().__init__()
         self.linear1 = nn.Linear(input_size, hidden_size)
-        self.linear2 = nn.Linear(hidden_size, output_size)
+        self.linear2 = nn.Linear(hidden_size, 256)
+        self.linear3 = nn.Linear(256, 128)
+        self.linear4 = nn.Linear(128, 64)
+        self.linear5 = nn.Linear(64, output_size)
 
     def forward(self, x):
-        x = F.relu(self.linear1(x))
+        x = self.linear1(x)
+        x = F.relu(x)
         x = self.linear2(x)
+        x = F.relu(x)
+        x = self.linear3(x)
+        x = F.relu(x)
+        x = self.linear4(x)
+        x = F.relu(x)
+        x = self.linear5(x)
         return x
     
     def save(self, file_name='model.pth'):
@@ -27,10 +37,12 @@ class Linear_QNet(nn.Module):
 
     
 class QTrainer:
-    def __init__(self, model: nn.Module, lr: float, gamma) -> None:
+    def __init__(self, model: nn.Module, lr: float, gamma: float, device='cuda:0') -> None:
         self.lr = lr
         self.gamma = gamma
         self.model = model
+        self.device = device
+        self.model.to(self.device)
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()
 
@@ -48,13 +60,15 @@ class QTrainer:
             done = (done, )
         
         # 1: predicted Q values with current state
+        state = state.to(self.device)
         pred = self.model(state)
 
         target = pred.clone()
         for idx in range(len(done)):
             Q_new = reward[idx]
             if not done[idx]:
-                Q_new = reward[idx] + self.gamma * torch.max(self.model(next_state[idx]))
+                n_s_idx = next_state[idx].to(self.device)
+                Q_new = reward[idx] + self.gamma * torch.max(self.model(n_s_idx))
             
             target[idx][torch.argmax(action).item()] = Q_new
 
